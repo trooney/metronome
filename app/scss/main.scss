@@ -9,7 +9,6 @@ $metronome-color: #999;
 // $metronome-color: #ee3e41;
 
 
-
 // @TODO
 @media (max-width: 480) {
 	body {
@@ -167,6 +166,7 @@ header {
 		font-size:$base-font-size - 2px;
 	} 
 	[name=signature] {
+		display:none;
 		width:3em;
 		padding:0;
 		margin:0;

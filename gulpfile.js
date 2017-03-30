@@ -13,6 +13,7 @@ gulp.task('sass', function() {
   return gulp.src("app/scss/*.scss")
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest(".tmp/styles"))
+    .pipe(gulp.dest('dist/styles'))
     .pipe(browserSync.stream());
 });
 
@@ -111,6 +112,7 @@ gulp.task('wiredep', () => {
 });
 
 gulp.task('build', ['html', 'scripts', 'images', 'fonts', 'extras'], () => {
+  
   return gulp.src('dist/**/*')
     .pipe($.size({title: 'build', gzip: true}));
 });
