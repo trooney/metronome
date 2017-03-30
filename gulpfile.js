@@ -111,8 +111,12 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['html', 'scripts', 'images', 'fonts', 'extras'], () => {
-  
+gulp.task('bower-build', () => {
+  return gulp.src('bower_components/**/*')
+    .pipe(gulp.dest('dist/bower_components'));
+});
+
+gulp.task('build', ['html', 'scripts', 'images', 'fonts', 'extras', 'bower-build'], () => {
   return gulp.src('dist/**/*')
     .pipe($.size({title: 'build', gzip: true}));
 });
