@@ -15,8 +15,8 @@ server {
     access_log /var/log/nginx/{{ server_hostname }}.access.log;
     error_log /var/log/nginx/{{ server_hostname }}.error.log;
 
-    # location / {
-    #     try_files $uri /index.html;
-    # }
+    location / {
+        try_files $uri /index.html;
+    }
     
 }

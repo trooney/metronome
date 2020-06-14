@@ -1,126 +1,200 @@
-// generated on 2017-01-06 using generator-webapp 2.1.0
-const gulp = require('gulp');
-const gulpLoadPlugins = require('gulp-load-plugins');
-const browserSync = require('browser-sync');
-const del = require('del');
-const wiredep = require('wiredep').stream;
-const sass = require('gulp-sass');
+// generated on 2020-06-05 using generator-webapp 4.0.0-8
+const { src, dest, watch, series, parallel, lastRun } = require("gulp");
+const gulpLoadPlugins = require("gulp-load-plugins");
+const browserSync = require("browser-sync");
+const del = require("del");
+const autoprefixer = require("autoprefixer");
+const cssnano = require("cssnano");
+const { argv } = require("yargs");
 
 const $ = gulpLoadPlugins();
-const reload = browserSync.reload;
+const server = browserSync.create();
 
-gulp.task('sass', function() {
-  return gulp.src("app/scss/*.scss")
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(".tmp/styles"))
-    .pipe(gulp.dest('dist/styles'))
-    .pipe(browserSync.stream());
-});
+const port = argv.port || 9000;
 
-gulp.task('scripts-slow', () => {
-  return gulp.src('app/scripts/**/*.js')
+const isProd = process.env.NODE_ENV === "production";
+const isTest = process.env.NODE_ENV === "test";
+const isDev = !isProd && !isTest;
+
+function styles() {
+  return src("app/styles/*.scss", {
+    sourcemaps: !isProd,
+  })
     .pipe($.plumber())
-    .pipe($.sourcemaps.init())
+    .pipe(
+      $.sass
+        .sync({
+          outputStyle: "expanded",
+          precision: 10,
+          includePaths: ["."],
+        })
+        .on("error", $.sass.logError)
+    )
+    .pipe($.postcss([autoprefixer()]))
+    .pipe(
+      dest(".tmp/styles", {
+        sourcemaps: !isProd,
+      })
+    )
+    .pipe(server.reload({ stream: true }));
+}
+
+function scripts() {
+  return src("app/scripts/**/*.js", {
+    sourcemaps: !isProd,
+  })
+    .pipe($.plumber())
     .pipe($.babel())
-    .pipe($.sourcemaps.write('.'))
-    .pipe(gulp.dest('.tmp/scripts'))
-    .pipe(gulp.dest('dist/scripts'));
-});
+    .pipe(
+      dest(".tmp/scripts", {
+        sourcemaps: !isProd ? "." : false,
+      })
+    )
+    .pipe(server.reload({ stream: true }));
+}
 
-// @NOTE Chain tasks to manage slow JS build
-gulp.task('scripts', ['scripts-slow'], reload)
+const lintBase = (files, options) => {
+  return src(files)
+    .pipe($.eslint(options))
+    .pipe(server.reload({ stream: true, once: true }))
+    .pipe($.eslint.format())
+    .pipe($.if(!server.active, $.eslint.failAfterError()));
+};
+function lint() {
+  return lintBase("app/scripts/**/*.js", { fix: true }).pipe(
+    dest("app/scripts")
+  );
+}
+function lintTest() {
+  return lintBase("test/spec/**/*.js");
+}
 
-gulp.task('html', ['sass', 'scripts'], () => {
-  return gulp.src('app/*.html')
-    .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-    .pipe(gulp.dest('dist'));
-});
+function html() {
+  return src("app/*.html")
+    .pipe($.useref({ searchPath: [".tmp", "app", "."] }))
+    .pipe($.if(/\.js$/, $.uglify({ compress: { drop_console: true } })))
+    .pipe(
+      $.if(/\.css$/, $.postcss([cssnano({ safe: true, autoprefixer: false })]))
+    )
+    .pipe(
+      $.if(
+        /\.html$/,
+        $.htmlmin({
+          collapseWhitespace: false,
+          minifyCSS: false,
+          minifyJS: { compress: { drop_console: true } },
+          processConditionalComments: true,
+          removeComments: true,
+          removeEmptyAttributes: true,
+          removeScriptTypeAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+        })
+      )
+    )
+    .pipe(dest("dist"));
+}
 
-gulp.task('images', () => {
-  return gulp.src('app/images/**/*')
-    .pipe($.cache($.imagemin({
-      progressive: true,
-      interlaced: true,
-      // don't remove IDs from SVGs, they are often used
-      // as hooks for embedding and styling
-      svgoPlugins: [{cleanupIDs: false}]
-    })))
-    .pipe(gulp.dest('dist/images'));
-});
+function images() {
+  return src("app/images/**/*", { since: lastRun(images) })
+    .pipe($.imagemin())
+    .pipe(dest("dist/images"));
+}
 
-gulp.task('fonts', () => {
-  return gulp.src(require('main-bower-files')('**/*.{eot,svg,ttf,woff,woff2}', function (err) {})
-    .concat('app/fonts/**/*'))
-    .pipe(gulp.dest('.tmp/fonts'))
-    .pipe(gulp.dest('dist/fonts'));
-});
+function fonts() {
+  return src("app/fonts/**/*.{eot,svg,ttf,woff,woff2}").pipe(
+    $.if(!isProd, dest(".tmp/fonts"), dest("dist/fonts"))
+  );
+}
 
-gulp.task('extras', () => {
-  return gulp.src([
-    'app/*.*',
-    '!app/*.html'
-  ], {
-    dot: true
-  }).pipe(gulp.dest('dist'));
-});
+function extras() {
+  return src(["app/*", "!app/*.html"], {
+    dot: true,
+  }).pipe(dest("dist"));
+}
 
-gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
+function clean() {
+  return del([".tmp", "dist"]);
+}
 
-gulp.task('serve', ['sass', 'scripts', 'fonts'], () => {
-  browserSync({
+function measureSize() {
+  return src("dist/**/*").pipe($.size({ title: "build", gzip: true }));
+}
+
+const build = series(
+  clean,
+  parallel(
+    lint,
+    series(parallel(styles, scripts), html),
+    images,
+    fonts,
+    extras
+  ),
+  measureSize
+);
+
+function startAppServer() {
+  server.init({
     notify: false,
-    port: 9000,
+    port,
     server: {
-      baseDir: ['.tmp', 'app'],
+      baseDir: [".tmp", "app"],
       routes: {
-        '/bower_components': 'bower_components'
-      }
-    }
+        "/node_modules": "node_modules",
+      },
+    },
   });
 
-  gulp.watch([
-    'app/*.html',
-    'app/views/*.html',
-    'app/images/**/*',
-    '.tmp/fonts/**/*'
-  ]).on('change', reload);
+  watch(["app/*.html", "app/images/**/*", ".tmp/fonts/**/*"]).on(
+    "change",
+    server.reload
+  );
 
-  gulp.watch("app/scss/**/*.scss", ['sass']);
-  gulp.watch('app/scripts/**/*.js', ['scripts']);
-  gulp.watch('app/fonts/**/*', ['fonts']);
-  gulp.watch('bower.json', ['wiredep', 'fonts']);
-});
+  watch("app/styles/**/*.scss", styles);
+  watch("app/scripts/**/*.js", scripts);
+  watch("app/fonts/**/*", fonts);
+}
 
-gulp.task('serve:dist', () => {
-  browserSync({
+function startTestServer() {
+  server.init({
     notify: false,
-    port: 9000,
+    port,
+    ui: false,
     server: {
-      baseDir: ['dist']
-    }
+      baseDir: "test",
+      routes: {
+        "/scripts": ".tmp/scripts",
+        "/node_modules": "node_modules",
+      },
+    },
   });
-});
 
-// inject bower components
-gulp.task('wiredep', () => {
-  gulp.src('app/*.html')
-    .pipe(wiredep({
-      exclude: ['bootstrap.js'],
-      ignorePath: /^(\.\.\/)*\.\./
-    }))
-    .pipe(gulp.dest('app'));
-});
+  watch("test/index.html").on("change", server.reload);
+  watch("app/scripts/**/*.js", scripts);
+  watch("test/spec/**/*.js", lintTest);
+}
 
-gulp.task('bower-build', () => {
-  return gulp.src('bower_components/**/*')
-    .pipe(gulp.dest('dist/bower_components'));
-});
+function startDistServer() {
+  server.init({
+    notify: false,
+    port,
+    server: {
+      baseDir: "dist",
+      routes: {
+        "/node_modules": "node_modules",
+      },
+    },
+  });
+}
 
-gulp.task('build', ['html', 'scripts', 'images', 'fonts', 'extras', 'bower-build'], () => {
-  return gulp.src('dist/**/*')
-    .pipe($.size({title: 'build', gzip: true}));
-});
+let serve;
+if (isDev) {
+  serve = series(clean, parallel(styles, scripts, fonts), startAppServer);
+} else if (isTest) {
+  serve = series(clean, scripts, startTestServer);
+} else if (isProd) {
+  serve = series(build, startDistServer);
+}
 
-gulp.task('default', ['clean'], () => {
-  gulp.start('build');
-});
+exports.serve = serve;
+exports.build = build;
+exports.default = build;

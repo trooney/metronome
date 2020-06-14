@@ -1,0 +1,4 @@
+#!/bin/bash
+
+gulp build
+ansible-playbook ansible/server.yml -i ansible/inventories/hosts.ini --ask-become-pass

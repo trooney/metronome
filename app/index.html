@@ -1,60 +1,96 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="description" content="Online Metronome">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <title>metronome.tylerrooney.ca</title>
-    <link href="//fonts.googleapis.com/css?family=Roboto:400,300,700" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="/styles/main.css">
-</head>
-<body>
+    <script
+      src="https://kit.fontawesome.com/3d293fdf09.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="//fonts.googleapis.com/css?family=Roboto:400,300,700"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!-- build:css styles/main.css -->
+    <link
+      rel="stylesheet"
+      href="/node_modules/bootstrap/dist/css/bootstrap.min.css"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="styles/main.css" type="text/css" />
+    <!-- endbuild -->
+  </head>
+  <body>
     <header>
-        <h1><span>Simple</span> Metronome</h1>
+      <h1><span>Simple</span> Metronome</h1>
     </header>
     <div class="container-fluid fill-height">
-        <div class="row fill-height">
-            <div class="col-sm-4 col-md-offset-4 fill-height">
-                <div class="flex-container">
-                    <section class="controls-container">
-                        <div class="controls">
-                            <div class="control">
-                                <span class="start glyphicon glyphicon-play" aria-hidden="true"><span class="hidden">Start</span></span>
-                                <span class="stop glyphicon glyphicon-stop" aria-hidden="true"><span class="hidden">Stop</span></span>                        
-                            </div>
-                            <div class="control">
-                                <span class="mute glyphicon glyphicon-volume-up" aria-hidden="true"><span class="hidden">Mute</span></span>
-                                <span class="unmute glyphicon glyphicon-volume-off" aria-hidden="true"><span class="hidden">Unmute</span></span>                        
-                            </div>
-                            <div class="control">
-                                <input name="bpm" value="60" type="text" pattern="\d*">
-                                <span>bpm</span>
-                            </div>
-                            <div class="control">
-                                <select name="signature">
-                                    <option value="0">4/4</option>
-                                    <option value="1">2/4</option>
-                                    <option value="2">3/4</option>
-                                    <option value="3">6/8</option>
-                                    <option value="4">2/2</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-                    <section class="metronome-container"></section>
-                    <section class="beat-container"></section>
+      <div class="row fill-height">
+        <div class="col-4 offset-md-4 fill-height">
+          <div class="flex-container">
+            <section class="controls-container">
+              <div class="controls">
+                <div class="control">
+                  <i class="start fas fa-play"
+                    ><span class="hidden">Start</span></i
+                  >
+                  <i class="stop fas fa-stop"
+                    ><span class="hidden">Stop</span></i
+                  >
                 </div>
-            </div>
+                <div class="control">
+                  <i class="mute fas fa-volume-up"
+                    ><span class="hidden">Unmute</span></i
+                  >
+                  <i class="unmute fas fa-volume-off"
+                    ><span class="hidden">Mute</span></i
+                  >
+                </div>
+                <div class="control">
+                  <input name="bpm" value="60" type="text" pattern="\d*" />
+                  <span>bpm</span>
+                </div>
+                <div class="control">
+                  <select name="signature">
+                    <option value="0">4/4</option>
+                    <option value="1">2/4</option>
+                    <option value="2">3/4</option>
+                    <option value="3">6/8</option>
+                    <option value="4">2/2</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+            <section class="metronome-container"></section>
+            <section class="beat-container"></section>
+          </div>
         </div>
+      </div>
     </div>
-    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <!-- build:js scripts/vendor.js -->
+    <script
+      type="text/javascript"
+      src="/node_modules/jquery/dist/jquery.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="/node_modules/bootstrap/dist/js/bootstrap.min.js"
+    ></script>
+    <!-- endbuild -->
+    <!-- build:js scripts/metronome.js -->
     <script src="/scripts/metronome.js"></script>
+    <!-- endbuild -->
     <script type="text/javascript">
-        const m = new Metronome();
-        m.initAudio()
+      const m = new Metronome();
+      m.initAudio();
 
-        const mui = new MetronomeUI(m);
+      const mui = new MetronomeUI(m);
     </script>
-</body>
+  </body>
 </html>
