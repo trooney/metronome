@@ -94,12 +94,6 @@ function html() {
     .pipe(dest("dist"));
 }
 
-function images() {
-  return src("app/images/**/*", { since: lastRun(images) })
-    .pipe($.imagemin())
-    .pipe(dest("dist/images"));
-}
-
 function fonts() {
   return src("app/fonts/**/*.{eot,svg,ttf,woff,woff2}").pipe(
     $.if(!isProd, dest(".tmp/fonts"), dest("dist/fonts"))
@@ -122,13 +116,7 @@ function measureSize() {
 
 const build = series(
   clean,
-  parallel(
-    lint,
-    series(parallel(styles, scripts), html),
-    images,
-    fonts,
-    extras
-  ),
+  parallel(lint, series(parallel(styles, scripts), html), fonts, extras),
   measureSize
 );
 
