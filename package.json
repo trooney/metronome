@@ -1,4 +1,9 @@
 {
+  "name": "metronome",
+  "license": "UNLICENSED",
+  "author": "Tyler Rooney",
+  "homepage": "https://github.com/trooney/metronome",
+  "version": "1.0.2",
   "private": true,
   "engines": {
     "node": ">=10"
@@ -12,7 +17,7 @@
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "autoprefixer": "^9.5.1",
-    "browser-sync": "^2.26.5",
+    "browser-sync": "^2.26.14",
     "chai": "^4.2.0",
     "cross-env": "^5.2.0",
     "cssnano": "^4.1.10",
