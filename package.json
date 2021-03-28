@@ -11,7 +11,8 @@
   "dependencies": {
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",
-    "popper.js": "^1.15.0"
+    "popper.js": "^1.15.0",
+    "postcss-svgo": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
