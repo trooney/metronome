@@ -9,7 +9,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^5.0.0",
     "jquery": "^3.4.1",
     "popper.js": "^1.15.0",
     "postcss-svgo": "^4.0.2"
